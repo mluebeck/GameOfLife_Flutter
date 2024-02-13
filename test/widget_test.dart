@@ -6,7 +6,7 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:game_of_live/playground.dart';
+import 'package:game_of_live/domain/playground.dart';
 
 Playground getTestPlaygroundWithCellAt(int x, int y,bool value) {
   Playground playground = Playground();

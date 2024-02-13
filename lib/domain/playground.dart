@@ -22,6 +22,27 @@ class Playground {
     return;
   }
 
+  Set<Cell> _copyCells() {
+    Set<Cell> set = <Cell>{};
+    for (Cell cell in cellSet) {
+      set.add(Cell(cell.x,cell.y));
+    }
+    return set;
+  }
+
+  void _clear() {
+    cellSet = <Cell>{};
+  }
+
+  // calculate next round by iterating over all cell elements
+  void calculateNextRound() {
+    Set<Cell> set = _copyCells();
+    _clear();
+    for (Cell cell in set) {
+      calculateNextStep(cell.x, cell.y);
+    }
+  }
+
   void calculateNextStep(int x, int y) {
     //WHEN #neighbors < 2
     int count = neighborsCount(x,y);

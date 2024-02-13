@@ -1,16 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:game_of_live/playground.dart';
+import 'dart:async';
 
-void main() {
-  runApp(const GameOfLife());
+enum ButtonEvent {
+    start, stop, pause, nextstep , refresh
 }
 
- 
- class GameOfLife extends StatelessWidget {
-  const GameOfLife({super.key});
+
+
+void drucken() {
+  print("Drucken");
+}
+
+void main() {
+  runApp( GameOfLife(pressed: drucken,streamController: StreamController<ButtonEvent>()));
+}
+
+
+class GameOfLife extends StatelessWidget {
+
+  final StreamController<ButtonEvent>? streamController;
+  StreamSink<ButtonEvent> get eventSink => streamController!.sink;
+  Stream<ButtonEvent> get eventStream => streamController!.stream;
+
+  final VoidCallback? pressed;
+
+  const GameOfLife({super.key, this.pressed ,this.streamController});
 
   @override
   Widget build(BuildContext context) {
+    print("build");
+
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -18,39 +37,48 @@ void main() {
         ),
         body: Column(
           children: [
-            const Expanded(
+             Expanded(
               child: Center(
-                child: GameBoard(),
+                child:
+
+                GameBoard(
+                  //onPressedStart: pressed,
+                  streamController: streamController
+                  ),
+
+
+
+
+                ),
               ),
-            ),
-            Padding(
+              Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   TextButton(
                     onPressed: () {
-                      // Hier die Logik für den Start-Button hinzufügen
-                      print('Start button pressed');
+                      ButtonEvent event = ButtonEvent.start;
+                      streamController!.sink.add(event);
                     },
                     child: const Text('Start'),
                   ),
                   TextButton(
                     onPressed: () {
-                      // Hier die Logik für den Pause-Button hinzufügen
-                      print('Pause button pressed');
+                      ButtonEvent event = ButtonEvent.pause;
+                      streamController!.sink.add(event);
                     },
                     child: const Text('Pause'),
                   ),
                   TextButton(
                     onPressed: () {
-                      // Hier die Logik für den Refresh-Button hinzufügen
-                      print('Refresh button pressed');
+                      ButtonEvent event = ButtonEvent.refresh;
+                      streamController!.sink.add(event);
                     },
                     child: const Text('Refresh'),
                   ),
                 ],
-              ),
+              ),     
             ),
           ],
         ),
@@ -60,21 +88,33 @@ void main() {
 }
 
 class GameBoard extends StatefulWidget {
-  const GameBoard({super.key});
+  //final VoidCallback? onPressedStart;
+
+  final StreamController<ButtonEvent>?  streamController;
+  StreamSink<ButtonEvent> get sink => streamController!.sink;
+  Stream<ButtonEvent> get stream => streamController!.stream;
+
+  //const GameBoard({super.key, required this.onPressedStart,this.streamController});
+  const GameBoard({super.key, this.streamController});
+
   @override
-  GameBoardState createState() => GameBoardState();
+  GameBoardState createState() =>  GameBoardState();
 }
 
 class GameBoardState extends State<GameBoard> {
-
   List<List<bool>> _grid = [[false]];
   final int _rows = 20;
   final int _columns = 20;
+  
 
   @override
   void initState() {
     super.initState();
     _initializeGrid();
+    widget.stream.listen((event) {
+      print("Listen to event:: ${event}");
+      _grid[0][0] = false;
+    });
   }
 
   void _initializeGrid() {
@@ -95,7 +135,6 @@ class GameBoardState extends State<GameBoard> {
           onTap: () {
             setState(() {
               _grid[row][col] = !_grid[row][col];
-              playground.setCellAt(row, col, _grid[row][col]);
             });
           },
           child: Container(
