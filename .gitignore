@@ -1,4 +1,6 @@
 android/
+.idea/
+.dart_tool/
 build/
 linux/
 windows/
